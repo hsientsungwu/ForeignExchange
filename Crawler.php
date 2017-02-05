@@ -10,19 +10,19 @@ class Crawler {
      * Current history ID
      * @var integer
      */
-    private $history = 0;
+    protected $history = 0;
 
     /**
      * Array of responses from curl result
      * @var array
      */
-    private $response = [];
+    protected $response = [];
 
     /**
      * Array of curl information from curl result
      * @var array
      */
-    private $curlInfo = [];
+    protected $curlInfo = [];
 
     /**
      * Function uses as the main property that crawls the page of a given url with provided configuration
@@ -66,28 +66,40 @@ class Crawler {
     }
 
     /**
-     * Function uses to retrieve curl response from a given history id
+     * Function uses to retrieve curl response from a given history id other wise if there is history, return the last history
      * @param  integer $historyId history id
      * @return array             response
      */
     public function getResponse($historyId = 0) {
         if ($historyId && array_key_exists($historyId, $this->response)) {
             return $this->response[$historyId];
+        } elseif ($this->history) {
+            return $this->response[$this->history];
         }
 
         return [];
     }
 
     /**
-     * Function uses to retrieve curl information from a given history id
+     * Function uses to retrieve curl information from a given history id other wise if there is history, return the last history
      * @param  integer $historyId history id
      * @return array             curl information
      */
     public function getCurlInfo($historyId = 0) {
         if ($historyId && array_key_exists($historyId, $this->curlInfo)) {
             return $this->curlInfo[$historyId];
+        } elseif ($this->history) {
+            return $this->curlInfo[$this->history];
         }
 
         return [];
+    }
+
+    /**
+     * Function uses to return the last history Id
+     * @return integer history id
+     */
+    public function getCurrentHistoryId() {
+        return $this->history;
     }
 }
