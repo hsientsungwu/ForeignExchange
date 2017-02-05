@@ -7,6 +7,6 @@ use Forex\ForexCrawler as ForexCrawler;
 
 $crawler = new ForexCrawler();
 
-$result = $crawler->getActivity();
+$result = $crawler->getTrades();
 
 var_dump($result);

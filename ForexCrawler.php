@@ -3,18 +3,30 @@
 namespace Forex;
 
 use Forex\Crawler as Crawler;
+use Forex\Trade as Trade;
 
+/**
+ * ForexCrawler class specialize in crawling and reorganize the data from forexfactory.com
+ */
 class ForexCrawler extends Crawler {
-    public function getActivity($currencies = []) {
+    /**
+     * Function uses to retrieve trades from forexfactory.com
+     * @param  array  $currencies array of currency pairs to filter
+     * @return array             success falg and array of trades
+     */
+    public function getTrades($currencies = []) {
         $success = false;
-        $activities = [];
+        $trades = [];
 
         if (empty($currencies)) {
+            // default currency pair if nothing was filtered
             $currencies[] = 'USDCAD';
         }
 
+        // url to retrieve forexfactory trades
         $url = "https://www.forexfactory.com/flex.php?more=0";
 
+        // post data - mimicing what's from the network call
         $postData = [
             's' => '',
             'securitytoken' => 'guest',
@@ -34,80 +46,131 @@ class ForexCrawler extends Crawler {
             ]
         ];
 
+        // curl configuration
         $curlConfig = [
             'CURLOPT_POSTFIELDS' => $postData,
             'CURLOPT_PORT' => 443,
         ];
 
+        // execute the crawl and obtain the history id
         $historyId = $this->crawl($url, $curlConfig);
 
         if ($this->curlInfo[$historyId]['http_code'] == 200) {
+            // if everything goes well, http code will return 200
             $success = true;
+
+            // initiate a new DOMDocument object
             $dom = new \DOMDocument;
+
+            // load HTML from the curl response string
             @$dom->loadHTML($this->response[$historyId]);
 
+            // base on the html returns from curl, there are multiple tables and only one we're interested ie. table with trades_activity__table class
             $tables = $dom->getElementsByTagName('table');
 
             foreach ($tables as $table) {
                 $classes = $table->getAttribute('class');
 
+                // only start the translation when correct table is iterated
                 if ($classes == 'activity trades_activity__table') {
+                    // every tr tag here represents each trade/activity/ticket
                     $trs = $table->getElementsByTagName('tr');
 
+                    // iterate through the tr tags
                     foreach ($trs as $tr) {
-                        $data = $tr->getElementsByTagName('td');
+                        // tr's id consisted of trader id, ticket id and transaction id
+                        $tag_tr_attribute_id = $tr->getAttribute('id');
+                        
+                        if ($tag_tr_attribute_id == '') continue;
 
-                        $activity = [
-                            'currency' => '',
-                            'action' => '', // BUY or SELL
-                            'value' => '',
-                            'caption' => '',
-                            'time' => '',
-                            'trader' => '',
-                            'return' => '',
-                            'pips' => ''
-                        ];
+                        // 0 => flexActivity, 1 => trader id, 2 => trade id, 3 => transaction id
+                        $tag_tr_attribute_id_exploded = explode('_', $tag_tr_attribute_id);
 
-                        foreach ($data as $index => $d) {
+                        // each td represent block of information about this trade
+                        // 0 => trade, 1 => trader, 2 => return, 3 => pips
+                        $tds = $tr->getElementsByTagName('td');
+
+                        // initiate a new ticket
+                        $trade = new Trade;
+                        $trade->setId($tag_tr_attribute_id_exploded[2]);
+                        $trade->setTransaction($tag_tr_attribute_id_exploded[3]);
+
+                        foreach ($tds as $index => $d) {
                             if ($index == 0) {
+                                // trade information
                                 $str = str_replace(["\n", "  "], " ", trim($d->nodeValue));
                                 $raw = explode(' ', $str);
 
-                                $activity['currency'] = $raw[0];
-                                $activity['action'] = $raw[1];
-                                $activity['value'] = $raw[2];
-                                $activity['caption'] = trim($raw[5]);
+                                $trade->setCurrency($raw[0]);
+                                $trade->setAction($raw[1]);
+                                $trade->setValue($raw[2]);
+                                $trade->setCaption(trim($raw[4]) . " " . trim($raw[5]));
+
                                 $hour = str_replace('~', '', $raw[7]);
-                                $activity['time'] = $hour . ' ' . $raw[8];
+                                $trade->setTime($hour . ' hours');
                             } elseif ($index == 1) {
-                                $activity['trader'] = trim($d->nodeValue);
+                                // trader information
+                                $imgs = $d->getElementsByTagName('img');
+
+                                // initiate trader object
+                                $trader = new Trader([
+                                    'id' => $tag_tr_attribute_id_exploded[1], 
+                                    'avatar' => $imgs[0]->getAttribute('src'), 
+                                    'username' => trim($d->nodeValue)]
+                                );
+                                $trade->setTrader($trader);
                             } elseif ($index == 2) {
-                                $raw = str_replace([' ', "\n"], '', trim($d->nodeValue));
+                                // return information - requires some clean up (explode and trim) in order to retrieve the return value
+                                $return = '';
+
+                                $raw = str_replace("\n", '', trim($d->nodeValue));
 
                                 if (strstr($raw, 'MTM')) {
-                                    $activity['return'] = $raw;
+                                    $mtm = explode("MTM", trim($raw));
+
+                                    if (count($mtm) > 1) {
+                                        $return = trim($mtm[count($mtm) - 2]) . "MTM";
+                                    } else {
+                                        $return = $raw;
+                                    }
                                 } else {
                                     $raw = explode(' ', str_replace('%', '% ', str_replace(" ", '', $raw)));
-                                    $activity['return'] = trim($raw[count($raw)-2]);
+                                    $return = trim($raw[count($raw)-2]);
                                 }
+
+                                $trade->setReturn($return);
                             } elseif ($index == 3) {
+                                // pips information - requires some clean up (explode and trim) in order to retrieve the pips value
+                                $pips = '';
+
                                 if (strstr($d->nodeValue, 'MTM')) {
-                                    $activity['pips'] = trim($d->nodeValue);
+                                    $mtm = explode("MTM", trim($d->nodeValue));
+
+                                    if (count($mtm) > 1) {
+                                        $pips = trim($mtm[count($mtm) - 2]) . "MTM";
+                                    } else {
+                                        $pips = $raw;
+                                    }
                                 } else {
                                     $raw = explode("\n", trim($d->nodeValue));
-                                    
-                                    $activity['pips'] = (count($raw) == 1 ? $raw[0] : trim(array_pop($raw)));
+                                    $pips = (count($raw) == 1 ? $raw[0] : trim(array_pop($raw)));
                                 }
+
+                                $trade->setPips($pips);
                             }
                         }
 
-                        if ($activity['currency'] != '') $activities[] = $activity;
+                        // add the trade into trades array
+                        $trades[] = $trade;
                     }
+
+                    // we can break out of the table iteration since we have accomplished the scraping of data at this point.
+                    break;
                 }
             }
         }
 
-        return ['success' => $success, 'activities' => $activities];
+        return ['success' => $success, 'trades' => $trades];
     }
 
     private function getModelData() {
