@@ -14,3 +14,9 @@ spl_autoload_register(function ($class) use ($mapping) {
         require $mapping[$class];
     }
 }, true);
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/support/frontend.func.php';
+
+define("TWIG_TEMPLATE_FOLDER", __DIR__ . '/template/');
+define("TWIG_TEMPLATE_CACHE_FOLDER", __DIR__ . '/cache/');

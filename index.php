@@ -5,8 +5,10 @@ require_once(__DIR__ . '/config.php');
 
 use Forex\ForexCrawler as ForexCrawler;
 
+/*
 $crawler = new ForexCrawler();
 
 $result = $crawler->getTrades();
+*/
 
-var_dump($result);
+echo renderView('html', 'index.html', []);
