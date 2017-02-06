@@ -7,12 +7,36 @@
     <meta name="description" content="Home page of Foreign Exchange">
 {% endblock %}
 
-{% block content %}
-    <h1>Trade</h1>
-    <p class="important">
-        Welcome to Foreign Exchange.
-    </p>
+{% block style %}
+    <link rel="stylesheet" href="/resources/vendor/chosen/chosen.css" />
+{% endblock %}
 
+{% block content %}
+    <div class="row">
+        <h1>Trade</h1>
+        <p class="important">
+            Last 120 trades in Foreign Exchange transactions
+        </p>
+    </div>
+
+    <div class="row">
+        <h3>Filters</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <form action="/trade" method="post">
+                <select class="chosen-select" name="currency[]" data-placeholder="Choose Currency Pair to filter..." style="width:350px;" multiple>
+                    <option value=""></option>
+                    {% for currency in currencies %}
+                        <option value="{{ currency }}" {{ currency in selected.currency ? 'selected="selected"' : '' }}>{{ currency }}</option>
+                    {% endfor %}
+                </select>
+                <input class="btn btn-primary" type="submit" value="Filter">
+            </form>
+        </div>
+    </div>
+    
+    <hr>
     <div class="row">
         <table class="table table-responsive">
             <thead>
@@ -28,7 +52,7 @@
             </thead>
             <tbody>
             {% for trade in trades %}
-                <tr>
+                <tr class="{{ trade.action == 'BUY' ? 'success' : '' }}">
                     <td>{{ trade.id }}</td>
                     <td>{{ trade.getTime('m/d/Y H:i A') }}</td>
                     <td>{{ trade.currency }}</td>
@@ -43,4 +67,9 @@
             </tbody>
         </table>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/resources/vendor/chosen/chosen.jquery.min.js" type="text/javascript"></script>
+    <script src="/resources/js/trade.js" type="text/javascript"></script>
 {% endblock %}

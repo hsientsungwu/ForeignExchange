@@ -31,10 +31,10 @@ if (in_array($params[1], array_keys($url_to_view_mappings))) {
     }
 }
 
-$request = new Request();
-
 if ($success) {
     // if success, let's call the view function
+    $request = new Request();
+
     echo call_user_func(__NAMESPACE__ . '\\' . $view['function'], $request);
 } else {
     // if fail, let's redirect the view to 404 page

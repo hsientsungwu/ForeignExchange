@@ -21,6 +21,11 @@ class ForexCrawler extends Crawler {
         if (empty($currencies)) {
             // default currency pair if nothing was filtered
             $currencies[] = 'USDCAD';
+        } else {
+            // remove backslash - it appears forefactory.com does not like backslash in the string
+            foreach ($currencies as &$currency) {
+                $currency = str_replace('/', '', $currency);
+            }
         }
 
         // url to retrieve forexfactory trades
