@@ -37,6 +37,15 @@
             </form>
         </div>
     </div>
+
+    <div class="row">
+        <h3>Search</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-10">
+            <input type="text" id="js-search-key" class="form-control" value="" placeholder="Enter Your Search Key Here" />
+        </div>
+    </div>
     
     <hr>
     <div class="row">
@@ -52,9 +61,9 @@
                 <th>Return</th>
                 <th>Pips</th>
             </thead>
-            <tbody>
+            <tbody class="trade-list">
             {% for trade in trades %}
-                <tr class="{{ trade.action == 'BUY' ? 'success' : '' }}">
+                <tr class="{{ trade.action == 'BUY' ? 'success' : '' }}" data-content="{{ trade.id }} {{ trade.currency }} {{ trade.trader.getusername() }} {{ trade.caption }}">
                     <td>{{ trade.id }}</td>
                     <td>{{ trade.getTime('m/d/Y H:i A') }}</td>
                     <td>{{ trade.currency }}</td>
@@ -73,5 +82,6 @@
 
 {% block scripts %}
     <script src="/resources/vendor/chosen/chosen.jquery.min.js" type="text/javascript"></script>
+    <script src="/resources/vendor/fsearch/fsearch.js" type="text/javascript"></script>
     <script src="/resources/js/trade.js" type="text/javascript"></script>
 {% endblock %}

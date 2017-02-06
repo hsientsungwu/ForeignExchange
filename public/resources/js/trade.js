@@ -17,4 +17,12 @@ $(document).ready(function() {
         $('.js-action').prop('value', 'download');
         $('.js-trade-form').submit();
     });
+
+    var search = $('#js-search-key').fsearch({
+        list  : '.trade-list tr',
+    });
+    
+    $('#js-search-key').blur(function() {
+        $(this).trigger('fsearch:reset');
+    });
 });
