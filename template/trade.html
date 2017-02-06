@@ -1,0 +1,46 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Home{% endblock %}
+{% block head %}
+    {{ parent() }}
+
+    <meta name="description" content="Home page of Foreign Exchange">
+{% endblock %}
+
+{% block content %}
+    <h1>Trade</h1>
+    <p class="important">
+        Welcome to Foreign Exchange.
+    </p>
+
+    <div class="row">
+        <table class="table table-responsive">
+            <thead>
+                <th>ID</th>
+                <th>Time</th>
+                <th>Currency Pair</th>
+                <th>Action</th>
+                <th>Caption</th>
+                <th>Value</th>
+                <th>Trader</th>
+                <th>Return</th>
+                <th>Pips</th>
+            </thead>
+            <tbody>
+            {% for trade in trades %}
+                <tr>
+                    <td>{{ trade.id }}</td>
+                    <td>{{ trade.getTime('m/d/Y H:i A') }}</td>
+                    <td>{{ trade.currency }}</td>
+                    <td>{{ trade.action }}</td>
+                    <td><a href="http://www.forexfactory.com/{{ trade.trader.getUsername() }}/">{{ trade.caption }}</a></td>
+                    <td>{{ trade.value }}</td>
+                    <td><img class="img" src="{{ trade.trader.getAvatarUrl() }}" /> <a href="http://www.forexfactory.com/{{ trade.trader.getUsername() }}/">{{ trade.trader.getUsername() }}</a></td>
+                    <td>{{ trade.return }}</td>
+                    <td>{{ trade.pips }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

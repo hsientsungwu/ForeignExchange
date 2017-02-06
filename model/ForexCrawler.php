@@ -106,8 +106,23 @@ class ForexCrawler extends Crawler {
                                 $trade->setValue($raw[2]);
                                 $trade->setCaption(trim($raw[4]) . " " . trim($raw[5]));
 
-                                $hour = str_replace('~', '', $raw[7]);
-                                $trade->setTime($hour . ' hours');
+                                
+                                
+                                if (!in_array($raw[8], ['hr', 'min'])) {
+                                    // it is a date
+                                    $timeString = $raw[7] . ' ' . $raw[8] . ' ' . $raw[9];
+                                } else {
+                                    // it is a time
+                                    $time_value = str_replace('~', '', $raw[7]);
+
+                                    $timeString = '- ' . $time_value . ' ' . ($raw[8] ? 'hours' : 'minutes');
+
+                                    if (isset($raw[10]) && $raw[10] == 'min') {
+                                        $timeString .= ' ' . $raw[9] . ' minutes';
+                                    }
+                                }              
+
+                                $trade->setTime($timeString);
                             } elseif ($index == 1) {
                                 // trader information
                                 $imgs = $d->getElementsByTagName('img');

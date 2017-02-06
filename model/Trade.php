@@ -111,6 +111,8 @@ class Trade {
      * @param double $value 
      */
     public function setValue($value) {
+        $value = str_replace('~', '', $value);
+
         if (is_numeric($value)) {
             $this->value = $value;
         }
@@ -134,8 +136,12 @@ class Trade {
         if ($timeString == '') {
             $this->time = timestamp();
         } else {
-            $this->time = strtotime('- ' . $timeString);
+            $this->time = strtotime($timeString);
         }
+    }
+
+    public function getTime($dateString = 'm/d/Y H:i A') {
+        return date($dateString, $this->time);
     }
 
     /**

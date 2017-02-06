@@ -51,8 +51,8 @@ class Trader {
 	 * @return string url
 	 */
 	public function getAvatarUrl() {
-		if ($this->id && $this->avatar) {
-			return $this->avatar;
+		if ($this->id && $this->avatarUrl) {
+			return $this->avatarUrl;
 		}
 
 		return 'https://cdn-resources.forexfactory.net/images/misc/avatar_default_16x16.png';
