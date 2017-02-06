@@ -36,6 +36,7 @@ if ($success) {
     $request = new Request();
 
     echo call_user_func(__NAMESPACE__ . '\\' . $view['function'], $request);
+    exit();
 } else {
     // if fail, let's redirect the view to 404 page
     header('Location: ' . URL . '/404/');

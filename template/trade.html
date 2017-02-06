@@ -24,14 +24,16 @@
     </div>
     <div class="row">
         <div class="col-md-6">
-            <form action="/trade" method="post">
+            <form class="js-trade-form" action="/trade" method="post">
                 <select class="chosen-select" name="currency[]" data-placeholder="Choose Currency Pair to filter..." style="width:350px;" multiple>
                     <option value=""></option>
                     {% for currency in currencies %}
                         <option value="{{ currency }}" {{ currency in selected.currency ? 'selected="selected"' : '' }}>{{ currency }}</option>
                     {% endfor %}
                 </select>
-                <input class="btn btn-primary" type="submit" value="Filter">
+                <input type="hidden" class="js-action" name="action" value="filter" />
+                <button class="js-filter-btn btn btn-primary">Filter</button>
+                <button class="js-download-btn btn btn-primary">Download</button>
             </form>
         </div>
     </div>
