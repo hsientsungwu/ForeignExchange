@@ -12,6 +12,8 @@ Make sure correct URL is defined in Forex/system/config.php ```define('URL', 'en
 
 ## Credits
 
+* Composer (https://getcomposer.org/)
+    * Dependency Manager for PHP
 * Twig (http://twig.sensiolabs.org/)
     * Templaing engine
 * Bootstrap (http://getbootstrap.com/)
