@@ -12,9 +12,7 @@ function renderView($type, $template = '', $data = []) {
         // render it as html string
         $loader = new Twig_Loader_Filesystem(TWIG_TEMPLATE_FOLDER);
         
-        $twig = new Twig_Environment($loader, array(
-            //'cache' => TWIG_TEMPLATE_CACHE_FOLDER,
-        ));
+        $twig = new Twig_Environment($loader, []);
 
         return $twig->render($template, $data);
     } elseif ($type == 'csv') {
